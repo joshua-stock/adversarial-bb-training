@@ -157,7 +157,7 @@ class FAGTB(object):
         for _ in range(n_estimators):
             tree = DecisionTreeRegressor(criterion='friedman_mse', max_depth=9,
   max_features=self.max_features, max_leaf_nodes=None,
-  min_impurity_decrease=0.0, min_impurity_split=None,
+  min_impurity_decrease=0.0,
   min_samples_leaf=1, min_samples_split=2,
   min_weight_fraction_leaf=0.0
   , random_state=0)
