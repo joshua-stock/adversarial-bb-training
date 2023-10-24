@@ -34,7 +34,6 @@ from fairness.algorithms.feldman.FeldmanAlgorithm import FeldmanAlgorithm
 from fairness.algorithms.baseline.SVM import SVM
 from fairness.algorithms.baseline.DecisionTree import DecisionTree
 from fairness.algorithms.baseline.GaussianNB import GaussianNB
-from fairness.algorithms.baseline.LogisticRegression import LogisticRegression
 from fairness.algorithms.ParamGridSearch import ParamGridSearch
 from fairness.algorithms.Ben.SDBSVM import SDBSVM
 import torch
@@ -56,17 +55,21 @@ def p_rule(y_pred, z_values, threshold=0.5):
     odds = y_z_1.mean() / y_z_0.mean()
     return np.min([odds, 1/odds]) * 100
 
+
 class Sigmoid():
     def __call__(self, x):
         return 1 / (1 + np.exp(-x))
+
     def gradient(self, x):
         return self.__call__(x) * (1 - self.__call__(x))
+
 
 def DispFNR(y_pred, y, z_values, threshold=0.5):
     ypred_z_1 = y_pred > threshold if threshold else y_pred[z_values == 1]
     ypred_z_0 = y_pred > threshold if threshold else y_pred[z_values == 0]
     result=abs(ypred_z_1[(y==1) & (z_values==0)].mean()-ypred_z_1[(y==1) & (z_values==1)].mean())
     return result
+
 
 def DispFPR(y_pred, y, z_values, threshold=0.5):
     ypred_z_1 = y_pred > threshold if threshold else y_pred[z_values == 1]
@@ -79,6 +82,7 @@ def DI(y_pred, z_values, threshold=0.5):
     y_z_0 = y_pred[z_values == 0] > threshold if threshold else y_pred[z_values == 0]
     odds = abs(y_z_1.mean() - y_z_0.mean())
     return odds
+
 
 def display_results(y_pred, y, sensitive):
     y_pred2 = (y_pred>0.5).astype(int)
@@ -124,17 +128,11 @@ def DATA_TRAIN_TEST(num,sens,y,columns_delete):
     return X_train, X_test, y_train, y_test, sensitive, sensitivet
 
 
-
-def p_rule(y_pred, z_values, threshold=0.5):
-    y_z_1 = y_pred[z_values == 1] > threshold if threshold else y_pred[z_values == 1]
-    y_z_0 = y_pred[z_values == 0] > threshold if threshold else y_pred[z_values == 0]
-    odds = y_z_1.mean() / y_z_0.mean()
-    return np.min([odds, 1/odds]) * 100
-
 def lossgr(y, p):
     # Avoid division by zero
     p = np.clip(p, 1e-15, 1 - 1e-15)
     return - y * np.log(p) - (1 - y) * np.log(1 - p)
+
 
 class FAGTB(object):
 
@@ -273,14 +271,9 @@ class FAGTB(object):
             y_fin = 1/(1+np.exp(-y_pred))
         # Set label to the value that maximizes probability
         return y_fin
-   
-tf.disable_v2_behavior() 
-class Sigmoid():
-    def __call__(self, x):
-        return 1 / (1 + np.exp(-x))
 
-    def gradient(self, x):
-        return self.__call__(x) * (1 - self.__call__(x))
+
+tf.disable_v2_behavior()
 
 
 class LogisticRegression():
