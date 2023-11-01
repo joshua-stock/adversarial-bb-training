@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
-
-from functions import DATA_TRAIN_TEST
+from sklearn.model_selection import train_test_split
 import operator
 
 # fraction of samples with sensitive=1
@@ -50,6 +49,15 @@ def find_indices_to_drop(sensitive, target_distribution):
     return indices_to_drop
 
 
+def data_train_test():
+    adult_df = pd.read_csv("census_data_oh.csv").drop(columns=["sex_Female", "income_<=50K"])
+    y = adult_df["income_>50K"]
+    X_train, X_test, y_train, y_test = train_test_split(adult_df.drop(columns=["income_>50K"]), y, train_size=0.8, random_state=0)
+    sensitive = X_train["sex_Male"].reset_index(drop=True)
+    sensitive_t = X_test["sex_Male"].reset_index(drop=True)
+    return X_train.reset_index(drop=True), X_test.reset_index(drop=True), y_train.reset_index(drop=True), y_test.reset_index(drop=True), sensitive, sensitive_t
+
+
 def get_distributed_adult_sets(distributions=None):
     if distributions is None:
         distributions = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -57,9 +65,7 @@ def get_distributed_adult_sets(distributions=None):
     for dist in distributions:
         print(f'now computing dist {dist}')
         np.random.seed(1)
-        X_train, X_test, y_train, y_test, sensitive, sensitive_t = DATA_TRAIN_TEST(1, 'sex', "income-per-year",
-                                                                                   ['sex', 'income-per-year',
-                                                                                    'race-sex'])
+        X_train, X_test, y_train, y_test, sensitive, sensitive_t = data_train_test()
 
         indices_to_drop = find_indices_to_drop(sensitive, dist)
         indices_to_drop_t = find_indices_to_drop(sensitive_t, dist)
@@ -71,8 +77,8 @@ def get_distributed_adult_sets(distributions=None):
             X_test=drop_index(X_test, idx=indices_to_drop_t),
             y_train=drop_index(y_train, idx=indices_to_drop).values.flatten(),
             y_test=drop_index(y_test, idx=indices_to_drop_t).values.flatten(),
-            sensitive=np.delete(sensitive, indices_to_drop, 0),
-            sensitive_t=np.delete(sensitive_t, indices_to_drop_t, 0)
+            sensitive=np.squeeze(drop_index(sensitive, idx=indices_to_drop)),
+            sensitive_t=np.squeeze(drop_index(sensitive_t, idx=indices_to_drop_t))
         )
         all_datasets.append(df)
     return all_datasets
