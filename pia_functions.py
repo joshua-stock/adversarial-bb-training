@@ -29,9 +29,9 @@ def find_indices_to_drop(sensitive, target_distribution):
 
     def current_dist(sensitive_value=1):
         if sensitive_value == 1:
-            return (pd.value_counts(sensitive)[1] - len(indices_to_drop)) / (length - len(indices_to_drop))
+            return (pd.Series(sensitive).value_counts()[1] - len(indices_to_drop)) / (length - len(indices_to_drop))
         else:
-            return (pd.value_counts(sensitive)[1]) / (length - len(indices_to_drop))
+            return (pd.Series(sensitive).value_counts()[1]) / (length - len(indices_to_drop))
 
     if current_dist() > target_distribution:
         comp = operator.gt
