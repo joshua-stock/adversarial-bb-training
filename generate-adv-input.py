@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 from pia_functions import get_distributed_adult_sets, generate_shadow_model_outputs, data_train_test
 
-test_run = True  # generate test data for adversary (train shadow models on test data, too)
-n_shadow_models = 40
+test_run = False  # generate test data for adversary (train shadow models on test data, too)
+n_shadow_models = 200
 distributions = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 X_train, _, _, _, _, _ = data_train_test()
 model_input = pd.read_csv("data/syn_data.csv", names=X_train.columns)

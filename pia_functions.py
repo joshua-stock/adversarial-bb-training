@@ -103,7 +103,7 @@ def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow
         y = dataset.y_test
     else:
         X = dataset.X_train
-        y = dataset.y_test
+        y = dataset.y_train
 
     parallel_results_generator = Parallel(n_jobs=20)(
         delayed(train_and_generate_output)(X, y, shadow_input, i) for i in range(n_shadow_models))
