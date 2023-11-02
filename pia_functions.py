@@ -5,7 +5,6 @@ from sklearn.model_selection import train_test_split
 import operator
 from joblib import Parallel, delayed
 
-# fraction of samples with sensitive=1
 
 class DatasetWithForcedDistribution:
     def __init__(self, sensitive_attribute_name, distribution, X_train, X_test, y_train, y_test, sensitive,
@@ -50,10 +49,10 @@ def find_indices_to_drop(sensitive, target_distribution):
     return indices_to_drop
 
 
-def data_train_test():
+def data_train_test(train_size=0.5):
     adult_df = pd.read_csv("data/census_data_oh.csv").drop(columns=["sex_Female", "income_<=50K"])
     y = adult_df["income_>50K"]
-    X_train, X_test, y_train, y_test = train_test_split(adult_df.drop(columns=["income_>50K"]), y, train_size=0.8, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(adult_df.drop(columns=["income_>50K"]), y, train_size=train_size, random_state=0)
     sensitive = X_train["sex_Male"].reset_index(drop=True)
     sensitive_t = X_test["sex_Male"].reset_index(drop=True)
     return X_train.reset_index(drop=True), X_test.reset_index(drop=True), y_train.reset_index(drop=True), y_test.reset_index(drop=True), sensitive, sensitive_t
