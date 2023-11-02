@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 import operator
+from joblib import Parallel, delayed
 
 # fraction of samples with sensitive=1
 
@@ -84,17 +85,28 @@ def get_distributed_adult_sets(distributions=None):
     return all_datasets
 
 
-def train_gradient_boosting_shadow_model(X_train, y_train, random_state=0):
+def train_gradient_boosting_shadow_model(X_train, y_train, random_state):
     gb = GradientBoostingClassifier(n_estimators=500, learning_rate = 0.05, max_depth = 3, max_features=90,random_state=random_state,  min_impurity_decrease=0.0,
                                     min_samples_leaf=2, min_samples_split=2,
                                     min_weight_fraction_leaf=0.0)
     return gb.fit(X_train, y_train)
 
 
-def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow_input, n_shadow_models=100):
-    outputs = []
-    for i in range(n_shadow_models):
-        shadow_model = train_gradient_boosting_shadow_model(dataset.X_train, dataset.y_train, i)
-        output = shadow_model.predict(shadow_input)
-        outputs.append(output.flatten())
+def train_and_generate_output(X_train, y_train, shadow_input, random_state=0):
+    shadow_model = train_gradient_boosting_shadow_model(X_train, y_train, random_state=random_state)
+    output = shadow_model.predict(shadow_input)
+    return output.flatten()
+
+
+def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow_input, n_shadow_models=100, use_test_data=False):
+    if use_test_data:
+        X = dataset.X_test
+        y = dataset.y_test
+    else:
+        X = dataset.X_train
+        y = dataset.y_test
+
+    parallel_results_generator = Parallel(n_jobs=20)(
+        delayed(train_and_generate_output)(X, y, shadow_input, i) for i in range(n_shadow_models))
+    outputs = list(parallel_results_generator)
     return outputs
