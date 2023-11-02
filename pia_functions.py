@@ -51,7 +51,7 @@ def find_indices_to_drop(sensitive, target_distribution):
 
 
 def data_train_test():
-    adult_df = pd.read_csv("census_data_oh.csv").drop(columns=["sex_Female", "income_<=50K"])
+    adult_df = pd.read_csv("data/census_data_oh.csv").drop(columns=["sex_Female", "income_<=50K"])
     y = adult_df["income_>50K"]
     X_train, X_test, y_train, y_test = train_test_split(adult_df.drop(columns=["income_>50K"]), y, train_size=0.8, random_state=0)
     sensitive = X_train["sex_Male"].reset_index(drop=True)

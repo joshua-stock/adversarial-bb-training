@@ -16,4 +16,4 @@ for ds in distributed_datasets:
 
 adv_df = pd.DataFrame(np.array(np.concatenate(all_shadow_outputs)))
 adv_df["y"] = np.concatenate(([np.repeat(d, n_shadow_models) for d in distributions]))
-adv_df.to_csv(f"shadow_model_outputs{'_test_set' if test_run else ''}.csv")
+adv_df.to_csv(f"data/shadow_model_outputs{'_test_set' if test_run else ''}.csv")
