@@ -91,13 +91,16 @@ def train_gradient_boosting_shadow_model(X_train, y_train, random_state):
     return gb.fit(X_train, y_train)
 
 
-def train_and_generate_output(X_train, y_train, shadow_input, random_state=0):
+def train_and_generate_output(X_train, y_train, shadow_input, output_probability, random_state=0):
     shadow_model = train_gradient_boosting_shadow_model(X_train, y_train, random_state=random_state)
-    output = shadow_model.predict(shadow_input)
+    if output_probability:
+        output = shadow_model.predict_proba(shadow_input)
+    else:
+        output = shadow_model.predict(shadow_input)
     return output.flatten()
 
 
-def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow_input, n_shadow_models=100, use_test_data=False):
+def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow_input, n_shadow_models=100, use_test_data=False, output_probability=False):
     if use_test_data:
         X = dataset.X_test
         y = dataset.y_test
@@ -106,6 +109,6 @@ def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow
         y = dataset.y_train
 
     parallel_results_generator = Parallel(n_jobs=20)(
-        delayed(train_and_generate_output)(X, y, shadow_input, i) for i in range(n_shadow_models))
+        delayed(train_and_generate_output)(X, y, shadow_input, output_probability, i) for i in range(n_shadow_models))
     outputs = list(parallel_results_generator)
     return outputs
