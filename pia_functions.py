@@ -97,10 +97,10 @@ def train_and_generate_output(X_train, y_train, shadow_input, output_probability
         output = shadow_model.predict_proba(shadow_input)
     else:
         output = shadow_model.predict(shadow_input)
-    return output.flatten()
+    return output[:,0]
 
 
-def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow_input, n_shadow_models=100, use_test_data=False, output_probability=False):
+def generate_shadow_model_outputs(dataset: DatasetWithForcedDistribution, shadow_input, n_shadow_models=100, use_test_data=False, output_probability=True):
     if use_test_data:
         X = dataset.X_test
         y = dataset.y_test
